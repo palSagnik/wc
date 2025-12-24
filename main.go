@@ -9,38 +9,50 @@ import (
 )
 
 var opts struct {
-	Size string `short:"c" long:"size" description:"print the size of file in bytes"`
-	Line string `short:"l" long:"lines" description:"print the number of lines"`
+	Size bool `short:"c" long:"size" description:"print the size of file in bytes"`
+	Line bool `short:"l" long:"lines" description:"print the number of lines"`
 }
 
 func main() {
-	_, err := flags.Parse(&opts)
+	args, err := flags.Parse(&opts)
 	if err != nil {
 		panic(err)
 	}
 
-	filepath := opts.Size
+	if len(args) == 0 {
+		fmt.Printf("Err: Filename is required")
+	}
+	filepath := args[0]
 
 	// SIZE LOGIC
 	// bytes
-	info, err := os.Stat(filepath)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+	if opts.Size {
+		info, err := os.Stat(filepath)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("%d ", info.Size())
 	}
-	byteSize := info.Size()
 
 	// lines
-	file, err := os.Open(filepath)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+	if opts.Line {
+		file, err := os.Open(filepath)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		var lines int64
+		for scanner.Scan() {
+			_ = scanner.Text()
+			lines++
+		}
+
+		fmt.Printf("%d ", lines)
 	}
 
-	scanner := bufio.NewScanner(file)
-	var lines int64
-	for scanner.Scan() {
-		_ = scanner.Text()
-		lines++
-	}
-
-	//fmt.Printf("%d %s\n", byteSize, filepath)
+	fmt.Printf("%s\n", filepath)
 }
