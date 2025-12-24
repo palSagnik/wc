@@ -42,5 +42,5 @@ func main() {
 		lines++
 	}
 
-	fmt.Printf("%d %s\n", byteSize, filepath)
+	//fmt.Printf("%d %s\n", byteSize, filepath)
 }
